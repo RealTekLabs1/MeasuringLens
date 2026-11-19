@@ -1,1 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A MeasuringLens recipe was shared with you</title>
+<meta name="description" content="Open this link on an iPhone with MeasuringLens to add the recipe to your saved recipes.">
+<meta property="og:title" content="A MeasuringLens recipe was shared with you">
+<meta property="og:description" content="Tap to add this recipe to MeasuringLens.">
+<meta property="og:type" content="website">
+<meta name="apple-itunes-app" content="app-id=6748652156">
+<meta name="robots" content="noindex">
+<style>
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0; padding: 48px 24px;
+    font: 17px/1.45 -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+    text-align: center; background: #fff; color: #1c1c1e;
+  }
+  @media (prefers-color-scheme: dark) { body { background: #000; color: #f2f2f7; } }
+  main { max-width: 420px; margin: 0 auto; }
+  h1 { font-size: 24px; margin: 0 0 12px; }
+  p { margin: 0 0 16px; }
+  .recipe { font-weight: 600; }
+  .button {
+    display: block; margin: 12px 0; padding: 14px 20px; border-radius: 14px;
+    font-weight: 600; text-decoration: none;
+  }
+  .primary { background: #00cc99; color: #fff; }
+  .secondary { color: #007aff; }
+  .note { font-size: 14px; opacity: 0.7; }
+</style>
+</head>
+<body>
+<main>
+  <h1>A recipe was shared with you</h1>
+  <p id="recipe-line" class="recipe" hidden></p>
+  <p>MeasuringLens turns an ordinary cup into a measuring cup. Get the app, then
+     go back to your text message and tap the link again to add this recipe.</p>
+  <a class="button primary" id="store-link" href="https://apps.apple.com/app/id6748652156">Get MeasuringLens on the App Store</a>
+  <a class="button secondary" id="open-link" href="#" hidden>Already have MeasuringLens? Open this recipe in the app</a>
+  <p class="note">The recipe is stored in the link itself and is never sent to this website.</p>
+</main>
+<script>
+(function () {
+  var storeURL = "https://apps.apple.com/app/id6748652156";
 
+  // The recipe is the part of the link after "#" (or "?d=").
+  var data = window.location.hash.replace(/^#/, "");
+  if (!data) {
+    var match = window.location.search.match(/[?&]d=([^&]+)/);
+    if (match) { data = match[1]; }
+  }
+
+  if (data) {
+    // Fallback for when iOS opened this page in Safari even though the app is
+    // installed: hand the same recipe to the app directly.
+    var openLink = document.getElementById("open-link");
+    openLink.href = "measuringlens://recipe#" + data;
+    openLink.hidden = false;
+
+    // Show the recipe's name. Shown as plain text only (textContent).
+    try {
+      var base64 = data.replace(/-/g, "+").replace(/_/g, "/");
+      while (base64.length % 4) { base64 += "="; }
+      var bytes = Uint8Array.from(atob(base64), function (c) { return c.charCodeAt(0); });
+      var name = JSON.parse(new TextDecoder().decode(bytes)).n;
+      if (typeof name === "string" && name) {
+        var line = document.getElementById("recipe-line");
+        line.textContent = "“" + name.slice(0, 20) + "”";
+        line.hidden = false;
+      }
+    } catch (e) { /* unreadable link: just leave the name off */ }
+  }
+
+  // Someone without the app: send them straight to its App Store page. Only
+  // on iPhone/iPad, and only once per visit, so that coming back to this tab
+  // (or pressing Back) shows the page above instead of bouncing again.
+  var isAppleMobile = /iPhone|iPad|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  var alreadyRedirected = false;
+  try { alreadyRedirected = sessionStorage.getItem("ml-store-redirect") === "1"; } catch (e) {}
+  if (isAppleMobile && !alreadyRedirected) {
+    try { sessionStorage.setItem("ml-store-redirect", "1"); } catch (e) {}
+    window.location.href = storeURL;
+  }
+})();
+</script>
+</body>
+</html>
