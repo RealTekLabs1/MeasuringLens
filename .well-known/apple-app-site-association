@@ -1,1 +1,13 @@
-
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["JJUJR52WUW.com.realteklabs.measuringlens"],
+        "components": [
+          { "/": "/recipe", "comment": "Shared recipe links" },
+          { "/": "/recipe/*", "comment": "Shared recipe links" }
+        ]
+      }
+    ]
+  }
+}
